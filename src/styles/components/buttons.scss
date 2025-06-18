@@ -1,0 +1,63 @@
+// Button component styles
+.button {
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  &--primary {
+    background-color: var(--primary-color);
+    color: white;
+
+    &:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+  }
+
+  &--secondary {
+    background-color: #f5f5f5;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+
+  &--danger {
+    background-color: var(--danger-color);
+    color: white;
+
+    &:hover {
+      background-color: #d32f2f;
+    }
+  }
+
+  &--small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  &--medium {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+
+  &--large {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}

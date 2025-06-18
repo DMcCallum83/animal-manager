@@ -1,54 +1,48 @@
-import "./App.css";
-
-const Animal = () => {
-  return (
-    <>
-      <div className="animal-container">
-        <h1>Poodle</h1>
-        <div className="animal-animal">
-          <img
-            src="src/poodle.svg"
-            alt="Your animal"
-            className="animal-image"
-          />
-          <h2>Animal Name</h2>
-        </div>
-        <div className="animal-stats">
-          <div className="stat">
-            <strong>Hunger:</strong>
-            <div className="meter">
-              <div className="meter-fill" style={{ width: "60%" }}></div>
-            </div>
-            <button className="action-button">Feed</button>
-          </div>
-          <div className="stat">
-            <strong>Happiness:</strong>
-            <div className="meter">
-              <div className="meter-fill" style={{ width: "80%" }}></div>
-            </div>
-            <button className="action-button">Play</button>
-          </div>
-          <div className="stat">
-            <strong>Sleep:</strong>
-            <div className="meter">
-              <div className="meter-fill" style={{ width: "50%" }}></div>
-            </div>
-            <button className="action-button">Rest</button>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-};
+import { Animal, AnimalType } from "./types";
+import { AnimalList } from "./components/animals/AnimalList";
+import { useAnimals } from "./hooks/useAnimals";
+import { useAnimalActions } from "./hooks/useAnimalActions";
+import { useGameLoop } from "./hooks/useGameLoop";
+import "./styles/index.scss";
 
 function App() {
-  return (
-    <div className="animal-page">
-      <button>Add Animal</button>
+  const { animals, addAnimal, updateAnimal, removeAnimal } = useAnimals();
+  const { feedAnimal, playWithAnimal, restAnimal } =
+    useAnimalActions(updateAnimal);
 
-      <div className="animal-wrapper">
-        <Animal />
-      </div>
+  // Start the game loop for automatic metric updates
+  useGameLoop(animals, updateAnimal);
+
+  const handleFeed = (animalId: string, animal: Animal) => {
+    feedAnimal(animalId, animal);
+  };
+
+  const handlePlay = (animalId: string, animal: Animal) => {
+    playWithAnimal(animalId, animal);
+  };
+
+  const handleRest = (animalId: string, animal: Animal) => {
+    restAnimal(animalId, animal);
+  };
+
+  const handleRemove = (animalId: string) => {
+    removeAnimal(animalId);
+  };
+
+  const handleAdd = (name: string, type: AnimalType) => {
+    return addAnimal(name, type);
+  };
+
+  return (
+    <div className="app">
+      <AnimalList
+        animals={animals}
+        onFeed={handleFeed}
+        onPlay={handlePlay}
+        onRest={handleRest}
+        onRemove={handleRemove}
+        onAdd={handleAdd}
+      />
     </div>
   );
 }
