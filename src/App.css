@@ -77,14 +77,10 @@ button:focus-visible {
 #root {
   width: 100vw;
   height: 100vh;
-} 
-
-
+}
 
 .animal-page > button {
-
   margin: 20px;
-
 }
 
 .animal-wrapper {
@@ -103,7 +99,6 @@ button:focus-visible {
   width: 350px;
   background-color: #f9f9f9;
   color: #2196f3;
- 
 }
 
 .animal-animal {
@@ -120,7 +115,6 @@ button:focus-visible {
 .animal-stats {
   margin-top: 20px;
   display: flex;
-
 }
 
 .stat {
