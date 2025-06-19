@@ -1,0 +1,42 @@
+// Design tokens and CSS variables
+:root {
+  font-family: "Chewy", serif;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // Custom properties for consistent theming
+  --primary-color: #646cff;
+  --primary-hover: #535bf2;
+  --secondary-color: #ff9800;
+  --success-color: #4caf50;
+  --danger-color: #f44336;
+  --text-color: rgba(255, 255, 255, 0.87);
+  --text-color-light: #213547;
+  --background-color: #242424;
+  --background-color-light: #ffffff;
+  --card-background: #1a1a1a;
+  --card-background-light: #f9f9f9;
+  --border-color: #ccc;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --transition: all 0.3s ease;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: var(--text-color-light);
+    background-color: var(--background-color-light);
+    --card-background: var(--card-background-light);
+  }
+}
