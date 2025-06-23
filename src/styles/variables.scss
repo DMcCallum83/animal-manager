@@ -28,9 +28,15 @@
   --card-background: #1a1a1a;
   --card-background-light: #f9f9f9;
   --border-color: #ccc;
+  --border-color-success: #66ec6b;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   --border-radius: 8px;
-  --transition: all 0.3s ease;
+  --transition: all 0.3s ease-in-out;
+  --text-size-x-large: 26px;
+  --text-size-large: 22px;
+  --text-size-medium: 18px;
+  --text-size-small: 16px;
+  --text-size-x-small: 14px;
 }
 
 @media (prefers-color-scheme: light) {

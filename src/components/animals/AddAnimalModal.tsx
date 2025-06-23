@@ -6,6 +6,8 @@ import { Button } from "../ui/Button";
 import { getAnimalTypeConfig } from "../../data/animalConfigs";
 import { validateAnimalName } from "../../utils/gameLogic";
 
+import "./AddAnimalModal.scss";
+
 interface AddAnimalModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +19,7 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
   onClose,
   onAdd,
 }) => {
-  const [name, setName] = useState("");
+  const [animalName, setAnimalName] = useState("");
   const [selectedType, setSelectedType] = useState<AnimalType>(AnimalType.DOG);
   const [nameError, setNameError] = useState("");
 
@@ -25,36 +27,43 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
     e.preventDefault();
 
     // Validate name
-    if (!validateAnimalName(name)) {
+    if (!validateAnimalName(animalName)) {
       setNameError("Name must be between 1 and 50 characters");
       return;
     }
 
     // Try to add animal
-    const success = onAdd(name, selectedType);
+    const success = onAdd(animalName, selectedType);
     if (success) {
-      // Reset form and close modal
-      setName("");
-      setSelectedType(AnimalType.DOG);
-      setNameError("");
-      onClose();
+      resetFormAndCloseModal();
     }
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
-    setName(newName);
+    setAnimalName(newName);
     if (nameError) {
       setNameError("");
     }
   };
 
+  const resetFormAndCloseModal = () => {
+    setAnimalName("");
+    setSelectedType(AnimalType.DOG);
+    setNameError("");
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Animal">
+    <Modal
+      isOpen={isOpen}
+      onClose={resetFormAndCloseModal}
+      title="Add New Animal"
+    >
       <form onSubmit={handleSubmit} className="add-animal-form">
         <Input
           label="Animal Name"
-          value={name}
+          value={animalName}
           onChange={handleNameChange}
           placeholder="Enter animal name..."
           error={nameError}

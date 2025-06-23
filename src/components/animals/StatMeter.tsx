@@ -1,32 +1,41 @@
+import "./StatMeter.scss";
+
 interface StatMeterProps {
   value: number;
   maxValue?: number;
-  color?: string;
+  statusReversed?: boolean;
 }
 
 export const StatMeter: React.FC<StatMeterProps> = ({
   value,
   maxValue = 100,
-  color = "#4caf50",
+  statusReversed = false,
 }) => {
   const percentage = Math.min(100, (value / maxValue) * 100);
 
-  // Determine color based on value
-  const getColor = (val: number) => {
-    if (val >= 80) return "#4caf50"; // Green for good
-    if (val >= 60) return "#ff9800"; // Orange for fair
-    return "#f44336"; // Red for poor
+  // Determine color class based on value
+  const getColorClass = (val: number) => {
+    if (statusReversed) {
+      if (val <= 10) return "meter-fill--excellent";
+      if (val <= 30) return "meter-fill--good";
+      if (val <= 50) return "meter-fill--fair";
+      return "meter-fill--poor";
+    } else {
+      if (val >= 90) return "meter-fill--excellent";
+      if (val >= 70) return "meter-fill--good";
+      if (val >= 50) return "meter-fill--fair";
+      return "meter-fill--poor";
+    }
   };
 
-  const meterColor = color === "#4caf50" ? getColor(value) : color;
+  const colorClass = getColorClass(value);
 
   return (
     <div className="meter">
       <div
-        className="meter-fill"
+        className={`meter-fill ${colorClass}`}
         style={{
           width: `${percentage}%`,
-          backgroundColor: meterColor,
         }}
       />
     </div>

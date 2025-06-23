@@ -1,0 +1,39 @@
+.meter {
+  margin-top: 1rem;
+  width: 100%;
+  height: 25px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  &:has(.meter-fill--excellent) {
+    border: 3px solid var(--border-color-success);
+  }
+
+  &-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+
+    &--excellent {
+      background: var(--success-color);
+      color: white;
+      height: 40px;
+    }
+
+    &--good {
+      background: var(--success-color);
+      color: white;
+    }
+
+    &--fair {
+      background: var(--secondary-color);
+      color: white;
+    }
+
+    &--poor {
+      background: var(--danger-color);
+      color: white;
+    }
+  }
+}

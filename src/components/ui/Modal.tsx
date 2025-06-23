@@ -1,5 +1,7 @@
 import React, { useEffect } from "react";
 
+import "./Modal.scss";
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;

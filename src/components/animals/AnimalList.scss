@@ -1,0 +1,10 @@
+.animal-page {
+  .animal-page-add-animal-button {
+    @media (max-width: 768px) {
+      padding: 10px 0;
+      margin: 20px auto;
+      display: block;
+      width: 90vw;
+    }
+  }
+}

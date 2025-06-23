@@ -1,7 +1,6 @@
-import React, { useState } from "react";
-import { Animal, AnimalType } from "../../types";
+import React from "react";
 import { AnimalCard } from "./AnimalCard";
-import { AddAnimalModal } from "./AddAnimalModal";
+import { Animal } from "../../types";
 
 interface AnimalListProps {
   animals: Animal[];
@@ -9,7 +8,6 @@ interface AnimalListProps {
   onPlay: (animalId: string, animal: Animal) => void;
   onRest: (animalId: string, animal: Animal) => void;
   onRemove: (animalId: string) => void;
-  onAdd: (name: string, type: AnimalType) => boolean;
 }
 
 export const AnimalList: React.FC<AnimalListProps> = ({
@@ -18,19 +16,10 @@ export const AnimalList: React.FC<AnimalListProps> = ({
   onPlay,
   onRest,
   onRemove,
-  onAdd,
 }) => {
-  const [showAddModal, setShowAddModal] = useState(false);
-
-  const handleAddAnimal = (name: string, type: AnimalType) => {
-    return onAdd(name, type);
-  };
-
   return (
     <div className="animal-page">
-      <button onClick={() => setShowAddModal(true)}>Add Animal</button>
-
-      <div className="animal-wrapper">
+      <div className="animal-cards-wrapper">
         {animals.map((animal) => (
           <AnimalCard
             key={animal.id}
@@ -42,12 +31,6 @@ export const AnimalList: React.FC<AnimalListProps> = ({
           />
         ))}
       </div>
-
-      <AddAnimalModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddAnimal}
-      />
     </div>
   );
 };

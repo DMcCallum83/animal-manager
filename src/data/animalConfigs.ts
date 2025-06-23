@@ -1,9 +1,13 @@
 import { AnimalType, AnimalTypeConfig } from "../types";
+import dogImage from "../assets/images/animal-dog.svg";
+import foxImage from "../assets/images/animal-fox.svg";
+import deerImage from "../assets/images/animal-deer.svg";
+import bearImage from "../assets/images/animal-bear.svg";
 
 export const ANIMAL_CONFIGS: Record<AnimalType, AnimalTypeConfig> = {
   [AnimalType.DOG]: {
     name: "Dog",
-    image: "/src/assets/images/dog.svg",
+    image: dogImage,
     happinessDecayRate: 0.5, // High happiness decay
     hungerIncreaseRate: 0.3, // Moderate hunger increase
     sleepinessIncreaseRate: 0.2, // Moderate sleep increase
@@ -13,9 +17,9 @@ export const ANIMAL_CONFIGS: Record<AnimalType, AnimalTypeConfig> = {
       rest: 15, // Good rest effectiveness
     },
   },
-  [AnimalType.CAT]: {
-    name: "Cat",
-    image: "/src/assets/images/cat.svg",
+  [AnimalType.FOX]: {
+    name: "Fox",
+    image: foxImage,
     happinessDecayRate: 0.2, // Low happiness decay
     hungerIncreaseRate: 0.2, // Low hunger increase
     sleepinessIncreaseRate: 0.4, // High sleep increase
@@ -25,9 +29,9 @@ export const ANIMAL_CONFIGS: Record<AnimalType, AnimalTypeConfig> = {
       rest: 20, // High rest effectiveness
     },
   },
-  [AnimalType.BIRD]: {
-    name: "Bird",
-    image: "/src/assets/images/bird.svg",
+  [AnimalType.DEER]: {
+    name: "Deer",
+    image: deerImage,
     happinessDecayRate: 0.6, // High happiness decay
     hungerIncreaseRate: 0.5, // High hunger increase
     sleepinessIncreaseRate: 0.1, // Low sleep increase
@@ -37,9 +41,9 @@ export const ANIMAL_CONFIGS: Record<AnimalType, AnimalTypeConfig> = {
       rest: 10, // Low rest effectiveness
     },
   },
-  [AnimalType.FISH]: {
-    name: "Fish",
-    image: "/src/assets/images/fish.svg",
+  [AnimalType.BEAR]: {
+    name: "Bear",
+    image: bearImage,
     happinessDecayRate: 0.1, // Very low happiness decay
     hungerIncreaseRate: 0.1, // Very low hunger increase
     sleepinessIncreaseRate: 0.1, // Very low sleep increase
