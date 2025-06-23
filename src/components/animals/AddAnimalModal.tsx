@@ -28,7 +28,7 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
 
     // Validate name
     if (!validateAnimalName(animalName)) {
-      setNameError("Name must be between 1 and 50 characters");
+      setNameError("Name must be between 1 and 12 characters");
       return;
     }
 
@@ -67,23 +67,21 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
           onChange={handleNameChange}
           placeholder="Enter animal name..."
           error={nameError}
-          required
         />
 
         <div className="animal-type-selection">
-          <label className="animal-type-label">Animal Type</label>
-          <div className="animal-type-options">
+          <label className="animal-type-label" htmlFor="animalType">
+            Animal Type
+          </label>
+          <div className="animal-type-options" id="animalType">
             {Object.values(AnimalType).map((type) => {
               const config = getAnimalTypeConfig(type);
               return (
-                <label key={type} className="animal-type-option">
-                  <input
-                    type="radio"
-                    name="animalType"
-                    value={type}
-                    checked={selectedType === type}
-                    onChange={() => setSelectedType(type)}
-                  />
+                <div
+                  key={type}
+                  className={`animal-type-option ${selectedType === type ? "selected" : ""}`}
+                  onClick={() => setSelectedType(type)}
+                >
                   <div className="animal-type-option-content">
                     <img
                       src={config.image}
@@ -92,17 +90,21 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
                     />
                     <span>{config.name}</span>
                   </div>
-                </label>
+                </div>
               );
             })}
           </div>
         </div>
 
         <div className="modal-actions">
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="danger" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!animalName || !selectedType}
+          >
             Add Animal
           </Button>
         </div>

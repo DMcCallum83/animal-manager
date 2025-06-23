@@ -81,7 +81,7 @@ export const applyAction = (
 };
 
 export const validateAnimalName = (name: string): boolean => {
-  return name.trim().length > 0 && name.trim().length <= 50;
+  return name.trim().length > 0 && name.trim().length <= 12;
 };
 
 export const getAnimalStatus = (animal: Animal): string => {
