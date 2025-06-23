@@ -1,10 +1,10 @@
 import { AnimalType } from "../../types";
 import {
-    applyAction,
-    calculateMetricChanges,
-    createAnimal,
-    getAnimalStatus,
-    validateAnimalName,
+  applyAction,
+  calculateMetricChanges,
+  createAnimal,
+  getAnimalStatus,
+  validateAnimalName,
 } from "../../utils/gameLogic";
 
 describe("gameLogic", () => {
