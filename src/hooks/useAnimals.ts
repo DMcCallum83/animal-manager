@@ -1,21 +1,28 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Animal, AnimalType } from "../types";
 import { createAnimal, validateAnimalName } from "../utils/gameLogic";
 import { saveAnimalsToStorage, loadAnimalsFromStorage } from "../utils/storage";
 
 export const useAnimals = () => {
   const [animals, setAnimals] = useState<Animal[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const previousAnimalsRef = useRef<Animal[]>([]);
 
   // Load animals from storage on mount
   useEffect(() => {
     const storedAnimals = loadAnimalsFromStorage();
     setAnimals(storedAnimals);
+    previousAnimalsRef.current = storedAnimals;
+    setIsInitialized(true);
   }, []);
 
-  // Save animals to storage whenever they change
+  // Save animals to storage whenever they change (but only after initial load)
   useEffect(() => {
-    saveAnimalsToStorage(animals);
-  }, [animals]);
+    if (isInitialized && animals !== previousAnimalsRef.current) {
+      saveAnimalsToStorage(animals);
+      previousAnimalsRef.current = animals;
+    }
+  }, [animals, isInitialized]);
 
   const addAnimal = useCallback((name: string, type: AnimalType): boolean => {
     if (!validateAnimalName(name)) {

@@ -24,5 +24,16 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
+    ignores: [
+      "src/vitest-env.d.ts",
+      "node_modules",
+      "build",
+      "dist",
+      "public",
+      ".vscode",
+      "*.test.ts",
+      "*.test.tsx",
+      "src/tests",
+    ],
   },
 );
