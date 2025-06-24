@@ -9,8 +9,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:watch": "vitest --watch",
-    "test:ui": "vitest --ui --coverage",
-    "test:coverage": "vitest --coverage",
+    "test:ui": "vitest --ui --coverage.enabled=true",
+    "test:coverage": "vitest run --coverage",
     "prettier:check": "prettier --check .",
     "prettier:fix": "prettier --write .",
     "lint": "eslint . --fix"
@@ -21,6 +21,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
+    "@vitest/coverage-istanbul": "^3.2.4",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.0",
     "prettier": "^3.5.3",

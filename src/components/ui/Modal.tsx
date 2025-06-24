@@ -37,10 +37,18 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
         <div className="modal-header">
-          <h2 className="modal-title">{title}</h2>
-          <button className="modal-close" onClick={onClose}>
+          <h2 className="modal-title" role="heading" aria-level={1}>
+            {title}
+          </h2>
+          <button className="modal-close" onClick={onClose} autoFocus={true}>
             ×
           </button>
         </div>

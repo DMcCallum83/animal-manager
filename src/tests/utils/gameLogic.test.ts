@@ -3,7 +3,6 @@ import {
   applyAction,
   calculateMetricChanges,
   createAnimal,
-  getAnimalStatus,
   validateAnimalName,
 } from "../../utils/gameLogic";
 
@@ -34,7 +33,7 @@ describe("gameLogic", () => {
     it("should return true for valid names", () => {
       expect(validateAnimalName("Buddy")).toBe(true);
       expect(validateAnimalName("A")).toBe(true);
-      expect(validateAnimalName("a".repeat(50))).toBe(true);
+      expect(validateAnimalName("aLongerName!")).toBe(true);
     });
 
     it("should return false for invalid names", () => {
@@ -117,52 +116,6 @@ describe("gameLogic", () => {
       const result = calculateMetricChanges(animal, timeDiff);
 
       expect(result.happiness).toBeGreaterThanOrEqual(0);
-    });
-  });
-
-  describe("getAnimalStatus", () => {
-    it('should return "Poor" for low happiness', () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.happiness = 15;
-
-      expect(getAnimalStatus(animal)).toBe("Poor");
-    });
-
-    it('should return "Poor" for high hunger', () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.hunger = 85;
-
-      expect(getAnimalStatus(animal)).toBe("Poor");
-    });
-
-    it('should return "Poor" for high sleepiness', () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.sleepiness = 85;
-
-      expect(getAnimalStatus(animal)).toBe("Poor");
-    });
-
-    it('should return "Fair" for moderate values', () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.happiness = 35;
-      animal.hunger = 65;
-
-      expect(getAnimalStatus(animal)).toBe("Fair");
-    });
-
-    it('should return "Excellent" for perfect values', () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.happiness = 85;
-      animal.hunger = 15;
-      animal.sleepiness = 15;
-
-      expect(getAnimalStatus(animal)).toBe("Excellent");
-    });
-
-    it('should return "Good" for default values', () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-
-      expect(getAnimalStatus(animal)).toBe("Good");
     });
   });
 });

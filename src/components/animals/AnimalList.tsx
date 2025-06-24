@@ -19,7 +19,7 @@ export const AnimalList: React.FC<AnimalListProps> = ({
 }) => {
   return (
     <div className="animal-page">
-      <div className="animal-cards-wrapper">
+      <div className="animal-cards-wrapper" role="list">
         {animals.map((animal) => (
           <AnimalCard
             key={animal.id}

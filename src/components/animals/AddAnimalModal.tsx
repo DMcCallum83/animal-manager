@@ -81,6 +81,7 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
                   key={type}
                   className={`animal-type-option ${selectedType === type ? "selected" : ""}`}
                   onClick={() => setSelectedType(type)}
+                  tabIndex={0}
                 >
                   <div className="animal-type-option-content">
                     <img

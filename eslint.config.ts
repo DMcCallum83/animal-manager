@@ -33,7 +33,7 @@ export default tseslint.config(
       ".vscode",
       "*.test.ts",
       "*.test.tsx",
-      "src/tests",
+      "src/tests/**",
     ],
   },
 );

@@ -31,7 +31,13 @@ export const StatMeter: React.FC<StatMeterProps> = ({
   const colorClass = getColorClass(value);
 
   return (
-    <div className="meter">
+    <div
+      className="meter"
+      role="meter"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={maxValue}
+    >
       <div
         className={`meter-fill ${colorClass}`}
         style={{
