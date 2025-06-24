@@ -81,19 +81,5 @@ export const applyAction = (
 };
 
 export const validateAnimalName = (name: string): boolean => {
-  return name.trim().length > 0 && name.trim().length <= 50;
-};
-
-export const getAnimalStatus = (animal: Animal): string => {
-  const { happiness, hunger, sleepiness } = animal;
-
-  if (happiness < 20 || hunger > 80 || sleepiness > 80) {
-    return "Poor";
-  } else if (happiness < 40 || hunger > 60 || sleepiness > 60) {
-    return "Fair";
-  } else if (happiness > 80 && hunger < 20 && sleepiness < 20) {
-    return "Excellent";
-  } else {
-    return "Good";
-  }
+  return name.trim().length > 0 && name.trim().length <= 12;
 };

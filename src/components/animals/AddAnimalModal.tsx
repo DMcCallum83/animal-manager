@@ -6,6 +6,8 @@ import { Button } from "../ui/Button";
 import { getAnimalTypeConfig } from "../../data/animalConfigs";
 import { validateAnimalName } from "../../utils/gameLogic";
 
+import "./AddAnimalModal.scss";
+
 interface AddAnimalModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,7 +19,7 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
   onClose,
   onAdd,
 }) => {
-  const [name, setName] = useState("");
+  const [animalName, setAnimalName] = useState("");
   const [selectedType, setSelectedType] = useState<AnimalType>(AnimalType.DOG);
   const [nameError, setNameError] = useState("");
 
@@ -25,56 +27,62 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
     e.preventDefault();
 
     // Validate name
-    if (!validateAnimalName(name)) {
-      setNameError("Name must be between 1 and 50 characters");
+    if (!validateAnimalName(animalName)) {
+      setNameError("Name must be between 1 and 12 characters");
       return;
     }
 
     // Try to add animal
-    const success = onAdd(name, selectedType);
+    const success = onAdd(animalName, selectedType);
     if (success) {
-      // Reset form and close modal
-      setName("");
-      setSelectedType(AnimalType.DOG);
-      setNameError("");
-      onClose();
+      resetFormAndCloseModal();
     }
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
-    setName(newName);
+    setAnimalName(newName);
     if (nameError) {
       setNameError("");
     }
   };
 
+  const resetFormAndCloseModal = () => {
+    setAnimalName("");
+    setSelectedType(AnimalType.DOG);
+    setNameError("");
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Animal">
+    <Modal
+      isOpen={isOpen}
+      onClose={resetFormAndCloseModal}
+      title="Add New Animal"
+    >
       <form onSubmit={handleSubmit} className="add-animal-form">
         <Input
           label="Animal Name"
-          value={name}
+          value={animalName}
           onChange={handleNameChange}
           placeholder="Enter animal name..."
           error={nameError}
-          required
         />
 
         <div className="animal-type-selection">
-          <label className="animal-type-label">Animal Type</label>
-          <div className="animal-type-options">
+          <label className="animal-type-label" htmlFor="animalType">
+            Animal Type
+          </label>
+          <div className="animal-type-options" id="animalType">
             {Object.values(AnimalType).map((type) => {
               const config = getAnimalTypeConfig(type);
               return (
-                <label key={type} className="animal-type-option">
-                  <input
-                    type="radio"
-                    name="animalType"
-                    value={type}
-                    checked={selectedType === type}
-                    onChange={() => setSelectedType(type)}
-                  />
+                <div
+                  key={type}
+                  className={`animal-type-option ${selectedType === type ? "selected" : ""}`}
+                  onClick={() => setSelectedType(type)}
+                  tabIndex={0}
+                >
                   <div className="animal-type-option-content">
                     <img
                       src={config.image}
@@ -83,17 +91,21 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
                     />
                     <span>{config.name}</span>
                   </div>
-                </label>
+                </div>
               );
             })}
           </div>
         </div>
 
         <div className="modal-actions">
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type="button" variant="danger" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary">
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!animalName || !selectedType}
+          >
             Add Animal
           </Button>
         </div>

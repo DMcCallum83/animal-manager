@@ -1,8 +1,8 @@
 export enum AnimalType {
   DOG = "dog",
-  CAT = "cat",
-  BIRD = "bird",
-  FISH = "fish",
+  FOX = "fox",
+  DEER = "deer",
+  BEAR = "bear",
 }
 
 export interface Animal {

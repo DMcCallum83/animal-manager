@@ -1,48 +1,42 @@
-# Animals Sample App 🐩
+# Animal Manager
 
-> _What could be more fun than having a pet? Making your own!_
+A virtual pet management game where you can adopt and care for different types
+of animals. Each animal has unique characteristics and requires regular
+attention to maintain their happiness, hunger, and sleep levels.
 
-## What Is This?
+## Features
 
-Your job is to create your own digital pet platform using this codebase as a
-starting point - how you continue is up to you!
+The app includes four different animal types (Dogs, Foxes, Deer, and Bears),
+each with distinct personalities and care requirements. Animals automatically
+lose happiness and gain hunger/sleepiness over time, requiring player
+interaction through feeding, playing, and resting actions. The game features a
+responsive design with real-time stat meters, persistent storage, and a modern
+UI.
 
-## Getting Started
+## Technology
 
-1. Clone the project
-2. Run `bun install`
-3. Write some magic to make your pets come alive!
-4. Push up to a brand new repo and send us a link
+Built with React 19, TypeScript, and Vite for optimal performance. Uses SCSS for
+styling with CSS custom properties for theming, and includes comprehensive
+testing with Vitest and Testing Library. The app leverages localStorage for data
+persistence and implements custom hooks for state management and game logic.
 
-## The Brief
+## How It Works
 
-- Users should be able to name animals
-- Users should be able to have multiple animals of different types
-- Playing with animals makes them happy
-- Feeding animals makes them less hungry
-- Resting animals makes them less sleepy
-- Animals start "neutral" on all metrics
-- Happiness should decrease over time
-- Hunger should increase over time
-- Sleepiness should increase over time
-- Happiness should decrease faster when sleep or hunger is full
-- Each animal type should have metrics which increase/decrease at different
-  rates
+The game runs on a continuous loop that updates animal stats every second. Each
+animal type has unique decay rates and action effectiveness values that
+determine how quickly their stats change and how much each action improves their
+condition. Players can add new animals through a modal interface and interact
+with them using action buttons that immediately affect their stats. All data is
+automatically saved to localStorage and persists between sessions.
 
-## Judging Criteria
+## Available Commands
 
-- All points in the brief have been followed and work as described
-- The main functionality and business logic should be tested. Each bullet point
-  in the brief should be tested explicitly
-- Use of 3rd party libraries is permitted but should be kept to a minimum - we
-  would like to see what you are capable of!
-- We also look at project structure, code clarity, type quality, use of bad
-  practices and bugs.
-- Solutions forking or PRing back to the main repo will be disqualified - please
-  upload to a new repo
-
----
-
-Any questions, drop us a message!
-
-Good Luck 🚀
+- `bun run dev` - Start the development server
+- `bun run build` - Build the project for production
+- `bun run preview` - Preview the production build locally
+- `bun run test` - Run tests in watch mode
+- `bun run test:ui` - Run tests with UI and coverage
+- `bun run test:coverage` - Run tests and generate coverage report
+- `bun run prettier:check` - Check code formatting
+- `bun run prettier:fix` - Fix code formatting
+- `bun run lint` - Run ESLint and fix issues
