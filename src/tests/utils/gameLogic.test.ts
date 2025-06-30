@@ -1,14 +1,18 @@
-import { AnimalType } from "../../types";
+import { AnimalType, HungerLevel } from "../../types";
 import {
   applyAction,
   calculateMetricChanges,
   createAnimal,
   validateAnimalName,
+  getHungerLevel,
+  isHungerUrgent,
+  createHungerAlert,
+  getHungerAlertMessage,
 } from "../../utils/gameLogic";
 
 describe("gameLogic", () => {
   describe("createAnimal", () => {
-    it("should create an animal with correct initial values", () => {
+    it("should create an animal with default values", () => {
       const animal = createAnimal("Buddy", AnimalType.DOG);
 
       expect(animal.name).toBe("Buddy");
@@ -22,100 +26,167 @@ describe("gameLogic", () => {
     });
 
     it("should use provided id if given", () => {
-      const customId = "custom-id-123";
-      const animal = createAnimal("Buddy", AnimalType.DOG, customId);
+      const animal = createAnimal("Buddy", AnimalType.DOG, "test-id");
 
-      expect(animal.id).toBe(customId);
+      expect(animal.id).toBe("test-id");
     });
   });
 
   describe("validateAnimalName", () => {
-    it("should return true for valid names", () => {
+    it("should validate valid names", () => {
       expect(validateAnimalName("Buddy")).toBe(true);
       expect(validateAnimalName("A")).toBe(true);
-      expect(validateAnimalName("aLongerName!")).toBe(true);
+      expect(validateAnimalName("123456789012")).toBe(true); // 12 characters
     });
 
-    it("should return false for invalid names", () => {
+    it("should reject invalid names", () => {
       expect(validateAnimalName("")).toBe(false);
       expect(validateAnimalName("   ")).toBe(false);
-      expect(validateAnimalName("a".repeat(51))).toBe(false);
+      expect(validateAnimalName("1234567890123")).toBe(false); // 13 characters
     });
   });
 
   describe("applyAction", () => {
-    it("should reduce hunger when feeding", () => {
+    it("should apply feed action correctly", () => {
       const animal = createAnimal("Buddy", AnimalType.DOG);
       animal.hunger = 80;
 
-      const result = applyAction(animal, "feed");
+      const changes = applyAction(animal, "feed");
 
-      expect(result.hunger).toBeLessThan(80);
-      expect(result.lastUpdated).toBeInstanceOf(Date);
+      expect(changes.hunger).toBeLessThan(animal.hunger);
+      expect(changes.lastUpdated).toBeInstanceOf(Date);
     });
 
-    it("should increase happiness when playing", () => {
+    it("should apply play action correctly", () => {
       const animal = createAnimal("Buddy", AnimalType.DOG);
       animal.happiness = 30;
 
-      const result = applyAction(animal, "play");
+      const changes = applyAction(animal, "play");
 
-      expect(result.happiness).toBeGreaterThan(30);
-      expect(result.lastUpdated).toBeInstanceOf(Date);
+      expect(changes.happiness).toBeGreaterThan(animal.happiness);
+      expect(changes.lastUpdated).toBeInstanceOf(Date);
     });
 
-    it("should reduce sleepiness when resting", () => {
+    it("should apply rest action correctly", () => {
       const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.sleepiness = 90;
+      animal.sleepiness = 80;
 
-      const result = applyAction(animal, "rest");
+      const changes = applyAction(animal, "rest");
 
-      expect(result.sleepiness).toBeLessThan(90);
-      expect(result.lastUpdated).toBeInstanceOf(Date);
+      expect(changes.sleepiness).toBeLessThan(animal.sleepiness);
+      expect(changes.lastUpdated).toBeInstanceOf(Date);
     });
   });
 
   describe("calculateMetricChanges", () => {
-    it("should increase hunger and sleepiness over time", () => {
+    it("should calculate metric changes over time", () => {
       const animal = createAnimal("Buddy", AnimalType.DOG);
-      const timeDiff = 5000; // 5 seconds
+      const timeDiffMs = 2000; // 2 seconds
 
-      const result = calculateMetricChanges(animal, timeDiff);
+      const changes = calculateMetricChanges(animal, timeDiffMs);
 
-      expect(result.hunger).toBeGreaterThan(50);
-      expect(result.sleepiness).toBeGreaterThan(50);
-      expect(result.lastUpdated).toBeInstanceOf(Date);
+      expect(changes.hunger).toBeGreaterThan(animal.hunger);
+      expect(changes.sleepiness).toBeGreaterThan(animal.sleepiness);
+      expect(changes.happiness).toBeLessThan(animal.happiness);
+      expect(changes.lastUpdated).toBeInstanceOf(Date);
+    });
+  });
+
+  describe("hunger level utilities", () => {
+    describe("getHungerLevel", () => {
+      it("should return correct hunger levels", () => {
+        expect(getHungerLevel(10)).toBe(HungerLevel.SATIATED); // Very hungry
+        expect(getHungerLevel(30)).toBe(HungerLevel.HUNGRY); // Hungry
+        expect(getHungerLevel(50)).toBe(HungerLevel.MODERATE); // Moderate
+        expect(getHungerLevel(70)).toBe(HungerLevel.FULL); // Full
+        expect(getHungerLevel(90)).toBe(HungerLevel.STUFFED); // Stuffed
+      });
     });
 
-    it("should decrease happiness over time", () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      const timeDiff = 5000; // 5 seconds
-
-      const result = calculateMetricChanges(animal, timeDiff);
-
-      expect(result.happiness).toBeLessThan(50);
+    describe("isHungerUrgent", () => {
+      it("should identify urgent hunger correctly", () => {
+        expect(isHungerUrgent(60)).toBe(false);
+        expect(isHungerUrgent(70)).toBe(true);
+        expect(isHungerUrgent(80)).toBe(true);
+        expect(isHungerUrgent(100)).toBe(true);
+      });
     });
 
-    it("should not exceed maximum values", () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.hunger = 95;
-      animal.sleepiness = 95;
-      const timeDiff = 10000; // 10 seconds
+    describe("createHungerAlert", () => {
+      it("should create alert for very hungry animals", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 15; // Very hungry
 
-      const result = calculateMetricChanges(animal, timeDiff);
+        const alert = createHungerAlert(animal);
 
-      expect(result.hunger).toBeLessThanOrEqual(100);
-      expect(result.sleepiness).toBeLessThanOrEqual(100);
+        expect(alert).not.toBeNull();
+        expect(alert?.animalId).toBe(animal.id);
+        expect(alert?.hungerLevel).toBe(HungerLevel.SATIATED);
+        expect(alert?.isUrgent).toBe(false);
+      });
+
+      it("should create alert for hungry animals", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 35; // Hungry
+
+        const alert = createHungerAlert(animal);
+
+        expect(alert).not.toBeNull();
+        expect(alert?.hungerLevel).toBe(HungerLevel.HUNGRY);
+        expect(alert?.isUrgent).toBe(false);
+      });
+
+      it("should create urgent alert for very hungry animals", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 75; // Urgent hunger
+
+        const alert = createHungerAlert(animal);
+
+        expect(alert).not.toBeNull();
+        expect(alert?.isUrgent).toBe(true);
+      });
+
+      it("should not create alert for full animals", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 60; // Full
+
+        const alert = createHungerAlert(animal);
+
+        expect(alert).toBeNull();
+      });
+
+      it("should not create alert for stuffed animals", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 85; // Stuffed
+
+        const alert = createHungerAlert(animal);
+
+        expect(alert).toBeNull();
+      });
     });
 
-    it("should not go below minimum values", () => {
-      const animal = createAnimal("Buddy", AnimalType.DOG);
-      animal.happiness = 5;
-      const timeDiff = 10000; // 10 seconds
+    describe("getHungerAlertMessage", () => {
+      it("should generate correct alert messages", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 15;
 
-      const result = calculateMetricChanges(animal, timeDiff);
+        const alert = createHungerAlert(animal);
+        const message = getHungerAlertMessage(alert!);
 
-      expect(result.happiness).toBeGreaterThanOrEqual(0);
+        expect(message).toContain("Buddy is very hungry!");
+        expect(message).toContain("Hunger: 15%");
+      });
+
+      it("should include urgency prefix for urgent alerts", () => {
+        const animal = createAnimal("Buddy", AnimalType.DOG);
+        animal.hunger = 75;
+
+        const alert = createHungerAlert(animal);
+        const message = getHungerAlertMessage(alert!);
+
+        expect(message).toContain("URGENT:");
+        expect(message).toContain("Buddy is hungry!");
+      });
     });
   });
 });

@@ -18,6 +18,7 @@
         padding: 20px;
         transition: var(--transition);
         border: 1px solid var(--border-color);
+        position: relative;
 
         &:hover {
           transform: translateY(-2px) scale(1.05);
@@ -31,6 +32,41 @@
             transform: none;
           }
         }
+
+        // Hunger alert styles
+        &.hungry {
+          border: 2px solid #f39c12;
+          background: linear-gradient(
+            135deg,
+            var(--card-background),
+            rgba(243, 156, 18, 0.05)
+          );
+
+          .hunger-warning {
+            color: #f39c12;
+            font-size: 1.2em;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+          }
+        }
+
+        &.urgent-hunger {
+          border: 3px solid #e74c3c;
+          background: linear-gradient(
+            135deg,
+            var(--card-background),
+            rgba(231, 76, 60, 0.1)
+          );
+          animation: urgentPulse 1.5s infinite;
+
+          .hunger-warning {
+            color: #e74c3c;
+            font-size: 1.4em;
+            margin-left: 8px;
+            animation: urgentPulse 1.5s infinite;
+          }
+        }
+
         @media (max-width: 768px) {
           width: 90vw;
         }
@@ -38,6 +74,10 @@
 
       &-header {
         margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
       }
 
       &-image-wrapper {
@@ -56,6 +96,38 @@
           margin-bottom: 10px;
           padding: 5px;
           flex: 1;
+
+          &.hunger-stat {
+            .stat-header {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 8px;
+
+              .urgent-indicator {
+                background: #e74c3c;
+                color: white;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: 0.7em;
+                font-weight: bold;
+                animation: urgentPulse 1.5s infinite;
+              }
+            }
+
+            &.hungry {
+              background: rgba(243, 156, 18, 0.1);
+              border-radius: 6px;
+              padding: 8px;
+            }
+
+            &.urgent-hunger {
+              background: rgba(231, 76, 60, 0.15);
+              border-radius: 6px;
+              padding: 8px;
+              border: 1px solid rgba(231, 76, 60, 0.3);
+            }
+          }
         }
       }
 
@@ -79,5 +151,43 @@
 
   &:hover {
     background-color: var(--primary-hover);
+  }
+
+  &.urgent-feed {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    font-weight: bold;
+    animation: urgentPulse 1.5s infinite;
+
+    &:hover {
+      background: linear-gradient(135deg, #c0392b, #a93226);
+    }
+  }
+}
+
+// Animations for hunger alerts
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes urgentPulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
