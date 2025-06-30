@@ -1,4 +1,4 @@
-import { Animal, AnimalType } from "../types";
+import { Animal, AnimalType, HungerLevel, HungerAlert } from "../types";
 import { getAnimalTypeConfig } from "../data/animalConfigs";
 
 export const createAnimal = (
@@ -82,4 +82,47 @@ export const applyAction = (
 
 export const validateAnimalName = (name: string): boolean => {
   return name.trim().length > 0 && name.trim().length <= 12;
+};
+
+// Hunger level utilities
+export const getHungerLevel = (hungerValue: number): HungerLevel => {
+  if (100 - hungerValue >= 20) return HungerLevel.STUFFED; // 80-100: Very full
+  if (100 - hungerValue >= 60) return HungerLevel.FULL; // 60-79: Getting full
+  if (100 - hungerValue >= 40) return HungerLevel.MODERATE; // 40-59: Moderate hunger
+  if (100 - hungerValue >= 20) return HungerLevel.HUNGRY; // 20-39: Hungry
+  return HungerLevel.SATIATED; // 0-19: Very hungry
+};
+
+export const isHungerUrgent = (hungerValue: number): boolean => {
+  return hungerValue >= 70; // Urgent when hunger is 70% or higher
+};
+
+export const createHungerAlert = (animal: Animal): HungerAlert | null => {
+  const hungerLevel = getHungerLevel(animal.hunger);
+  const isUrgent = isHungerUrgent(animal.hunger);
+
+  // Only create alerts for hungry animals (hunger level SATIATED or HUNGRY)
+  if (
+    hungerLevel !== HungerLevel.SATIATED &&
+    hungerLevel !== HungerLevel.HUNGRY
+  ) {
+    return null;
+  }
+
+  return {
+    animalId: animal.id,
+    animalName: animal.name,
+    animalType: animal.type,
+    hungerLevel,
+    hungerValue: animal.hunger,
+    timestamp: new Date(),
+    isUrgent,
+  };
+};
+
+export const getHungerAlertMessage = (alert: HungerAlert): string => {
+  const urgency = alert.isUrgent ? "URGENT: " : "";
+  const level =
+    alert.hungerLevel === HungerLevel.SATIATED ? "very hungry" : "hungry";
+  return `${urgency}${alert.animalName} is ${level}! (Hunger: ${Math.round(alert.hungerValue)}%)`;
 };
