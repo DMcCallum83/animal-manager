@@ -34,3 +34,22 @@ export interface AnimalAction {
   animalId: string;
   timestamp: Date;
 }
+
+// Hunger alert types
+export enum HungerLevel {
+  SATIATED = "satiated", // 0-20: Very hungry
+  HUNGRY = "hungry", // 21-40: Hungry
+  MODERATE = "moderate", // 41-60: Moderate hunger
+  FULL = "full", // 61-80: Getting full
+  STUFFED = "stuffed", // 81-100: Very full
+}
+
+export interface HungerAlert {
+  animalId: string;
+  animalName: string;
+  animalType: AnimalType;
+  hungerLevel: HungerLevel;
+  hungerValue: number;
+  timestamp: Date;
+  isUrgent: boolean; // true if hunger < 30
+}
