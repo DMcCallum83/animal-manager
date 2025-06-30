@@ -121,7 +121,7 @@ describe("Modal", () => {
         <div>Content</div>
       </Modal>,
     );
-    screen.logTestingPlaygroundURL();
+
     expect(screen.getByText("Content")).toBeInTheDocument();
     expect(screen.queryByRole("heading")).toBeInTheDocument();
   });
