@@ -1,7 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import App from "../App";
 
-// Mock the hooks to avoid complex state management in tests
+// Mock the hooks before importing App
 vi.mock("../../hooks/useAnimals", () => ({
   useAnimals: () => ({
     animals: [],
@@ -22,6 +21,20 @@ vi.mock("../../hooks/useAnimalActions", () => ({
     restAnimal: vi.fn(),
   }),
 }));
+
+// Create a stable reference for the empty array
+const stableEmptyArray: any[] = [];
+
+// Mock the storage module to prevent useSyncExternalStore issues
+vi.mock("../../utils/storage", () => ({
+  animalsStore: {
+    subscribe: vi.fn(() => () => {}),
+    getSnapshot: vi.fn(() => stableEmptyArray),
+    update: vi.fn(),
+  },
+}));
+
+import App from "../App";
 
 describe("App", () => {
   beforeEach(() => {

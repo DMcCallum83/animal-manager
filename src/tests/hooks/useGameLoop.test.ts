@@ -19,6 +19,8 @@ describe("useGameLoop", () => {
     // Mock timer functions as spies
     vi.spyOn(global, "setInterval");
     vi.spyOn(global, "clearInterval");
+    vi.spyOn(global, "setTimeout");
+    vi.spyOn(global, "clearTimeout");
 
     mockCalculateMetricChanges.mockImplementation(
       (animal: Animal, _timeDiff: number) => ({
@@ -44,15 +46,15 @@ describe("useGameLoop", () => {
     ...overrides,
   });
 
-  it("should set up interval on mount", () => {
+  it("should set up timeout and interval on mount", () => {
     const animals = [createMockAnimal()];
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    expect(setInterval).toHaveBeenCalledWith(expect.any(Function), 1000);
+    expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), 1000);
   });
 
-  it("should clear interval on unmount", () => {
+  it("should clear timeout and interval on unmount", () => {
     const animals = [createMockAnimal()];
 
     const { unmount } = renderHook(() =>
@@ -61,28 +63,28 @@ describe("useGameLoop", () => {
 
     unmount();
 
-    expect(clearInterval).toHaveBeenCalled();
+    expect(clearTimeout).toHaveBeenCalled();
   });
 
-  it("should update animals after 1 second", () => {
+  it("should update animals after 2 seconds (1s delay + 1s interval)", () => {
     const animals = [createMockAnimal()];
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    // Advance time by 1 second
-    vi.advanceTimersByTime(1000);
+    // Advance time by 2 seconds (1s for timeout + 1s for interval)
+    vi.advanceTimersByTime(2000);
 
     expect(mockCalculateMetricChanges).toHaveBeenCalled();
     expect(mockUpdateAnimal).toHaveBeenCalled();
   });
 
-  it("should not update animals before 1 second", () => {
+  it("should not update animals before 2 seconds", () => {
     const animals = [createMockAnimal()];
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    // Advance time by 500ms
-    vi.advanceTimersByTime(500);
+    // Advance time by 1.5 seconds (not enough for timeout + interval)
+    vi.advanceTimersByTime(1500);
 
     expect(mockCalculateMetricChanges).not.toHaveBeenCalled();
     expect(mockUpdateAnimal).not.toHaveBeenCalled();
@@ -96,7 +98,7 @@ describe("useGameLoop", () => {
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(2000);
 
     expect(mockCalculateMetricChanges).toHaveBeenCalledTimes(2);
     expect(mockUpdateAnimal).toHaveBeenCalledTimes(2);
@@ -107,7 +109,7 @@ describe("useGameLoop", () => {
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(2000);
 
     expect(mockCalculateMetricChanges).toHaveBeenCalledWith(
       animals[0],
@@ -130,7 +132,7 @@ describe("useGameLoop", () => {
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(2000);
 
     expect(mockCalculateMetricChanges).toHaveBeenCalledTimes(2);
   });
@@ -147,14 +149,14 @@ describe("useGameLoop", () => {
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    // Advance time by only 400ms (total time difference = 900ms, which is < 1000ms)
-    vi.advanceTimersByTime(400);
+    // Advance time by 1.5 seconds (timeout fires but animal was updated recently)
+    vi.advanceTimersByTime(1500);
 
     expect(mockCalculateMetricChanges).not.toHaveBeenCalled();
     expect(mockUpdateAnimal).not.toHaveBeenCalled();
   });
 
-  it("should clear and recreate interval when dependencies change", () => {
+  it("should clear and recreate timeout when dependencies change", () => {
     const animals1 = [createMockAnimal({ id: "animal-1" })];
     const animals2 = [createMockAnimal({ id: "animal-2" })];
 
@@ -165,8 +167,8 @@ describe("useGameLoop", () => {
 
     rerender({ animals: animals2 });
 
-    expect(clearInterval).toHaveBeenCalled();
-    expect(setInterval).toHaveBeenCalledTimes(2);
+    expect(clearTimeout).toHaveBeenCalled();
+    expect(setTimeout).toHaveBeenCalledTimes(2);
   });
 
   it("should handle empty animals array", () => {
@@ -174,7 +176,7 @@ describe("useGameLoop", () => {
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(2000);
 
     expect(mockCalculateMetricChanges).not.toHaveBeenCalled();
     expect(mockUpdateAnimal).not.toHaveBeenCalled();
@@ -185,9 +187,9 @@ describe("useGameLoop", () => {
 
     renderHook(() => useGameLoop(animals, mockUpdateAnimal));
 
-    vi.advanceTimersByTime(1000);
-    vi.advanceTimersByTime(1000);
-    vi.advanceTimersByTime(1000);
+    vi.advanceTimersByTime(2000); // First update
+    vi.advanceTimersByTime(1000); // Second update
+    vi.advanceTimersByTime(1000); // Third update
 
     expect(mockCalculateMetricChanges).toHaveBeenCalledTimes(3);
     expect(mockUpdateAnimal).toHaveBeenCalledTimes(3);

@@ -1,57 +1,49 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback } from "react";
+import { useSyncExternalStore } from "react";
 import { Animal, AnimalType } from "../types";
 import { createAnimal, validateAnimalName } from "../utils/gameLogic";
-import { saveAnimalsToStorage, loadAnimalsFromStorage } from "../utils/storage";
+import { animalsStore } from "../utils/storage";
 
 export const useAnimals = () => {
-  const [animals, setAnimals] = useState<Animal[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const previousAnimalsRef = useRef<Animal[]>([]);
-
-  // Load animals from storage on mount
-  useEffect(() => {
-    const storedAnimals = loadAnimalsFromStorage();
-    setAnimals(storedAnimals);
-    previousAnimalsRef.current = storedAnimals;
-    setIsInitialized(true);
-  }, []);
-
-  // Save animals to storage whenever they change (but only after initial load)
-  useEffect(() => {
-    if (isInitialized && animals !== previousAnimalsRef.current) {
-      saveAnimalsToStorage(animals);
-      previousAnimalsRef.current = animals;
-    }
-  }, [animals, isInitialized]);
+  // Use useSyncExternalStore to automatically sync with localStorage
+  const animals = useSyncExternalStore(
+    animalsStore.subscribe,
+    animalsStore.getSnapshot,
+    () => [], // Server-side fallback
+  );
 
   const addAnimal = useCallback((name: string, type: AnimalType): boolean => {
     if (!validateAnimalName(name)) {
       return false;
     }
-
+    const currentAnimals = animalsStore.getSnapshot();
     const newAnimal = createAnimal(name, type);
-    setAnimals((prev) => [...prev, newAnimal]);
+    const updatedAnimals = [...currentAnimals, newAnimal];
+    animalsStore.update(updatedAnimals);
     return true;
   }, []);
 
-  const updateAnimal = useCallback((id: string, updates: Partial<Animal>) => {
-    setAnimals((prev) =>
-      prev.map((animal) =>
+  const updateAnimal = useCallback(
+    (id: string, updates: Partial<Animal>) => {
+      const currentAnimals = animalsStore.getSnapshot();
+      const updatedAnimals = currentAnimals.map((animal) =>
         animal.id === id ? { ...animal, ...updates } : animal,
-      ),
-    );
-  }, []);
+      );
+      animalsStore.update(updatedAnimals);
+    },
+    [], // No dependencies - function is now stable
+  );
 
   const removeAnimal = useCallback((id: string) => {
-    setAnimals((prev) => prev.filter((animal) => animal.id !== id));
+    const currentAnimals = animalsStore.getSnapshot();
+    const updatedAnimals = currentAnimals.filter((animal) => animal.id !== id);
+    animalsStore.update(updatedAnimals);
   }, []);
 
-  const getAnimal = useCallback(
-    (id: string) => {
-      return animals.find((animal) => animal.id === id);
-    },
-    [animals],
-  );
+  const getAnimal = useCallback((id: string) => {
+    const currentAnimals = animalsStore.getSnapshot();
+    return currentAnimals.find((animal) => animal.id === id);
+  }, []);
 
   return {
     animals,
