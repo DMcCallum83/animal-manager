@@ -33,21 +33,50 @@ const subscribeToStorage = (callback: () => void) => {
   };
 };
 
+// Cache for the last snapshot to avoid infinite loops
+let lastSnapshot: Animal[] | null = null;
+let lastStoredData: string | null = null;
+
 // Get current state from localStorage
 const getSnapshot = (): Animal[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return [];
 
+    // If no data and we have a cached empty array, return it
+    if (!stored) {
+      if (lastSnapshot && lastStoredData === null) {
+        return lastSnapshot;
+      }
+      lastStoredData = null;
+      lastSnapshot = [];
+      return lastSnapshot;
+    }
+
+    // If data hasn't changed, return cached snapshot
+    if (stored === lastStoredData && lastSnapshot) {
+      return lastSnapshot;
+    }
+
+    // Parse new data
     const serializedAnimals: SerializedAnimal[] = JSON.parse(stored);
-    return serializedAnimals.map((animal) => ({
+    const newSnapshot = serializedAnimals.map((animal) => ({
       ...animal,
       createdAt: new Date(animal.createdAt),
       lastUpdated: new Date(animal.lastUpdated),
     }));
+
+    // Cache the new snapshot
+    lastStoredData = stored;
+    lastSnapshot = newSnapshot;
+    return newSnapshot;
   } catch (error) {
     console.error("Failed to load animals from storage:", error);
-    return [];
+    if (lastSnapshot && lastStoredData === null) {
+      return lastSnapshot;
+    }
+    lastStoredData = null;
+    lastSnapshot = [];
+    return lastSnapshot;
   }
 };
 
