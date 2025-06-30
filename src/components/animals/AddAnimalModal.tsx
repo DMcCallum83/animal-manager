@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import { AnimalType } from "../../types";
 import { Modal } from "../ui/Modal";
 import { Input } from "../ui/Input";
@@ -14,26 +14,68 @@ interface AddAnimalModalProps {
   onAdd: (name: string, type: AnimalType) => boolean;
 }
 
+// Form state type
+type FormState = {
+  animalName: string;
+  selectedType: AnimalType;
+  nameError: string;
+};
+
+// Form action types
+type FormAction =
+  | { type: "SET_NAME"; payload: string }
+  | { type: "SET_TYPE"; payload: AnimalType }
+  | { type: "SET_ERROR"; payload: string }
+  | { type: "RESET_FORM" };
+
+// Initial form state
+const initialFormState: FormState = {
+  animalName: "",
+  selectedType: AnimalType.DOG,
+  nameError: "",
+};
+
+// Form reducer
+const formReducer = (state: FormState, action: FormAction): FormState => {
+  switch (action.type) {
+    case "SET_NAME":
+      return {
+        ...state,
+        animalName: action.payload,
+        nameError: state.nameError ? "" : state.nameError, // Clear error when typing
+      };
+    case "SET_TYPE":
+      return { ...state, selectedType: action.payload };
+    case "SET_ERROR":
+      return { ...state, nameError: action.payload };
+    case "RESET_FORM":
+      return initialFormState;
+    default:
+      return state;
+  }
+};
+
 export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
   isOpen,
   onClose,
   onAdd,
 }) => {
-  const [animalName, setAnimalName] = useState("");
-  const [selectedType, setSelectedType] = useState<AnimalType>(AnimalType.DOG);
-  const [nameError, setNameError] = useState("");
+  const [formState, dispatch] = useReducer(formReducer, initialFormState);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate name
-    if (!validateAnimalName(animalName)) {
-      setNameError("Name must be between 1 and 12 characters");
+    if (!validateAnimalName(formState.animalName)) {
+      dispatch({
+        type: "SET_ERROR",
+        payload: "Name must be between 1 and 12 characters",
+      });
       return;
     }
 
     // Try to add animal
-    const success = onAdd(animalName, selectedType);
+    const success = onAdd(formState.animalName, formState.selectedType);
     if (success) {
       resetFormAndCloseModal();
     }
@@ -41,16 +83,15 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
-    setAnimalName(newName);
-    if (nameError) {
-      setNameError("");
-    }
+    dispatch({ type: "SET_NAME", payload: newName });
+  };
+
+  const handleTypeSelect = (type: AnimalType) => {
+    dispatch({ type: "SET_TYPE", payload: type });
   };
 
   const resetFormAndCloseModal = () => {
-    setAnimalName("");
-    setSelectedType(AnimalType.DOG);
-    setNameError("");
+    dispatch({ type: "RESET_FORM" });
     onClose();
   };
 
@@ -63,10 +104,10 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
       <form onSubmit={handleSubmit} className="add-animal-form">
         <Input
           label="Animal Name"
-          value={animalName}
+          value={formState.animalName}
           onChange={handleNameChange}
           placeholder="Enter animal name..."
-          error={nameError}
+          error={formState.nameError}
         />
 
         <div className="animal-type-selection">
@@ -79,8 +120,8 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
               return (
                 <div
                   key={type}
-                  className={`animal-type-option ${selectedType === type ? "selected" : ""}`}
-                  onClick={() => setSelectedType(type)}
+                  className={`animal-type-option ${formState.selectedType === type ? "selected" : ""}`}
+                  onClick={() => handleTypeSelect(type)}
                   tabIndex={0}
                 >
                   <div className="animal-type-option-content">
@@ -104,7 +145,7 @@ export const AddAnimalModal: React.FC<AddAnimalModalProps> = ({
           <Button
             type="submit"
             variant="primary"
-            disabled={!animalName || !selectedType}
+            disabled={!formState.animalName || !formState.selectedType}
           >
             Add Animal
           </Button>
