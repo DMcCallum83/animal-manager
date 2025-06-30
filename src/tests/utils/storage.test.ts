@@ -3,6 +3,7 @@ import {
   loadAnimalsFromStorage,
 } from "../../utils/storage";
 import { Animal, AnimalType } from "../../types";
+import { animalsStore, clearStorage } from "../../utils/storage";
 
 describe("storage", () => {
   let mockStorage: Record<string, string>;
@@ -267,5 +268,146 @@ describe("storage", () => {
       expect(loaded[0].type).toBe(AnimalType.DOG);
       expect(loaded[1].type).toBe(AnimalType.FOX);
     });
+  });
+});
+
+// Mock storage event
+const createStorageEvent = (key: string, newValue: string | null) => {
+  return new StorageEvent("storage", {
+    key,
+    newValue,
+    oldValue: null,
+  });
+};
+
+describe("animalsStore with useSyncExternalStore", () => {
+  let mockStorage: Record<string, string>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearStorage();
+
+    // Create fresh storage for each test
+    mockStorage = {};
+
+    // Mock localStorage methods
+    Object.defineProperty(window, "localStorage", {
+      value: {
+        getItem: (key: string) => mockStorage[key] || null,
+        setItem: (key: string, value: string) => {
+          mockStorage[key] = value;
+        },
+        removeItem: (key: string) => {
+          delete mockStorage[key];
+        },
+        clear: () => {
+          mockStorage = {};
+        },
+        length: Object.keys(mockStorage).length,
+        key: (index: number) => Object.keys(mockStorage)[index] || null,
+      },
+      writable: true,
+    });
+  });
+
+  it("should initialize with empty array when no data exists", () => {
+    const snapshot = animalsStore.getSnapshot();
+    expect(snapshot).toEqual([]);
+  });
+
+  it("should load animals from localStorage", () => {
+    const mockAnimals = [
+      {
+        id: "1",
+        name: "Buddy",
+        type: AnimalType.DOG,
+        hunger: 50,
+        happiness: 75,
+        sleepiness: 20,
+        createdAt: "2024-01-01T00:00:00.000Z",
+        lastUpdated: "2024-01-01T00:00:00.000Z",
+      },
+    ];
+
+    localStorage.setItem("animal-manager-data", JSON.stringify(mockAnimals));
+    const snapshot = animalsStore.getSnapshot();
+
+    expect(snapshot).toHaveLength(1);
+    expect(snapshot[0].name).toBe("Buddy");
+    expect(snapshot[0].createdAt).toBeInstanceOf(Date);
+    expect(snapshot[0].lastUpdated).toBeInstanceOf(Date);
+  });
+
+  it("should update store and notify listeners", () => {
+    const mockListener = vi.fn();
+    const unsubscribe = animalsStore.subscribe(mockListener);
+
+    const animals = [
+      {
+        id: "1",
+        name: "Buddy",
+        type: AnimalType.DOG,
+        hunger: 50,
+        happiness: 75,
+        sleepiness: 20,
+        createdAt: new Date(),
+        lastUpdated: new Date(),
+      },
+    ];
+
+    animalsStore.update(animals);
+
+    const stored = localStorage.getItem("animal-manager-data");
+    expect(stored).toBeDefined();
+    expect(mockListener).toHaveBeenCalled();
+
+    unsubscribe();
+  });
+
+  it("should handle storage events from other tabs", () => {
+    const mockListener = vi.fn();
+    const unsubscribe = animalsStore.subscribe(mockListener);
+
+    // Simulate storage change from another tab
+    const storageEvent = createStorageEvent("animal-manager-data", "[]");
+    window.dispatchEvent(storageEvent);
+
+    expect(mockListener).toHaveBeenCalled();
+
+    unsubscribe();
+  });
+
+  it("should handle errors gracefully", () => {
+    // Mock localStorage.setItem to throw an error
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = vi.fn().mockImplementation(() => {
+      throw new Error("Storage error");
+    });
+
+    const animals = [
+      {
+        id: "1",
+        name: "Buddy",
+        type: AnimalType.DOG,
+        hunger: 50,
+        happiness: 75,
+        sleepiness: 20,
+        createdAt: new Date(),
+        lastUpdated: new Date(),
+      },
+    ];
+
+    // Should not throw
+    expect(() => animalsStore.update(animals)).not.toThrow();
+
+    // Restore original function
+    localStorage.setItem = originalSetItem;
+  });
+
+  it("should handle JSON parsing errors", () => {
+    localStorage.setItem("animal-manager-data", "invalid json");
+
+    const snapshot = animalsStore.getSnapshot();
+    expect(snapshot).toEqual([]);
   });
 });
