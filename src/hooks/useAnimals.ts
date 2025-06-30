@@ -1,50 +1,48 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback } from "react";
+import { useSyncExternalStore } from "react";
 import { Animal, AnimalType } from "../types";
 import { createAnimal, validateAnimalName } from "../utils/gameLogic";
-import { saveAnimalsToStorage, loadAnimalsFromStorage } from "../utils/storage";
+import { animalsStore } from "../utils/storage";
 
 export const useAnimals = () => {
-  const [animals, setAnimals] = useState<Animal[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const previousAnimalsRef = useRef<Animal[]>([]);
+  // Use useSyncExternalStore to automatically sync with localStorage
+  const animals = useSyncExternalStore(
+    animalsStore.subscribe,
+    animalsStore.getSnapshot,
+    () => [], // Server-side fallback
+  );
 
-  // Load animals from storage on mount
-  useEffect(() => {
-    const storedAnimals = loadAnimalsFromStorage();
-    setAnimals(storedAnimals);
-    previousAnimalsRef.current = storedAnimals;
-    setIsInitialized(true);
-  }, []);
+  const addAnimal = useCallback(
+    (name: string, type: AnimalType): boolean => {
+      if (!validateAnimalName(name)) {
+        return false;
+      }
 
-  // Save animals to storage whenever they change (but only after initial load)
-  useEffect(() => {
-    if (isInitialized && animals !== previousAnimalsRef.current) {
-      saveAnimalsToStorage(animals);
-      previousAnimalsRef.current = animals;
-    }
-  }, [animals, isInitialized]);
+      const newAnimal = createAnimal(name, type);
+      const updatedAnimals = [...animals, newAnimal];
+      animalsStore.update(updatedAnimals);
+      return true;
+    },
+    [animals],
+  );
 
-  const addAnimal = useCallback((name: string, type: AnimalType): boolean => {
-    if (!validateAnimalName(name)) {
-      return false;
-    }
-
-    const newAnimal = createAnimal(name, type);
-    setAnimals((prev) => [...prev, newAnimal]);
-    return true;
-  }, []);
-
-  const updateAnimal = useCallback((id: string, updates: Partial<Animal>) => {
-    setAnimals((prev) =>
-      prev.map((animal) =>
+  const updateAnimal = useCallback(
+    (id: string, updates: Partial<Animal>) => {
+      const updatedAnimals = animals.map((animal) =>
         animal.id === id ? { ...animal, ...updates } : animal,
-      ),
-    );
-  }, []);
+      );
+      animalsStore.update(updatedAnimals);
+    },
+    [animals],
+  );
 
-  const removeAnimal = useCallback((id: string) => {
-    setAnimals((prev) => prev.filter((animal) => animal.id !== id));
-  }, []);
+  const removeAnimal = useCallback(
+    (id: string) => {
+      const updatedAnimals = animals.filter((animal) => animal.id !== id);
+      animalsStore.update(updatedAnimals);
+    },
+    [animals],
+  );
 
   const getAnimal = useCallback(
     (id: string) => {
