@@ -1,22 +1,31 @@
 import { renderHook, act } from "@testing-library/react";
 import { useAnimals } from "../../hooks/useAnimals";
 import { AnimalType } from "../../types";
-import * as storage from "../../utils/storage";
+import { animalsStore } from "../../utils/storage";
 import * as gameLogic from "../../utils/gameLogic";
 
 // Mock the storage and gameLogic modules
-vi.mock("../../utils/storage");
+vi.mock("../../utils/storage", () => ({
+  animalsStore: {
+    subscribe: vi.fn(),
+    getSnapshot: vi.fn(),
+    update: vi.fn(),
+  },
+}));
 vi.mock("../../utils/gameLogic");
 
 describe("useAnimals", () => {
-  const mockLoadAnimalsFromStorage = vi.mocked(storage.loadAnimalsFromStorage);
-  const mockSaveAnimalsToStorage = vi.mocked(storage.saveAnimalsToStorage);
+  const mockAnimalsStore = vi.mocked(animalsStore);
   const mockCreateAnimal = vi.mocked(gameLogic.createAnimal);
   const mockValidateAnimalName = vi.mocked(gameLogic.validateAnimalName);
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLoadAnimalsFromStorage.mockReturnValue([]);
+    mockAnimalsStore.getSnapshot.mockReturnValue([]);
+    mockAnimalsStore.subscribe.mockImplementation((callback: () => void) => {
+      // Return a cleanup function
+      return () => {};
+    });
     mockCreateAnimal.mockImplementation((name: string, type: AnimalType) => ({
       id: "test-uuid-123",
       name,
@@ -34,7 +43,7 @@ describe("useAnimals", () => {
     const { result } = renderHook(() => useAnimals());
 
     expect(result.current.animals).toEqual([]);
-    expect(mockLoadAnimalsFromStorage).toHaveBeenCalledTimes(1);
+    expect(mockAnimalsStore.getSnapshot).toHaveBeenCalled();
   });
 
   it("should load animals from storage on mount", () => {
@@ -50,7 +59,7 @@ describe("useAnimals", () => {
         lastUpdated: new Date(),
       },
     ];
-    mockLoadAnimalsFromStorage.mockReturnValue(mockAnimals);
+    mockAnimalsStore.getSnapshot.mockReturnValue(mockAnimals);
 
     const { result } = renderHook(() => useAnimals());
 
@@ -65,10 +74,8 @@ describe("useAnimals", () => {
       expect(success).toBe(true);
     });
 
-    expect(result.current.animals).toHaveLength(1);
-    expect(result.current.animals[0].name).toBe("Buddy");
-    expect(result.current.animals[0].type).toBe(AnimalType.DOG);
     expect(mockCreateAnimal).toHaveBeenCalledWith("Buddy", AnimalType.DOG);
+    expect(mockAnimalsStore.update).toHaveBeenCalled();
   });
 
   it("should not add animal with invalid name", () => {
@@ -80,8 +87,8 @@ describe("useAnimals", () => {
       expect(success).toBe(false);
     });
 
-    expect(result.current.animals).toHaveLength(0);
     expect(mockCreateAnimal).not.toHaveBeenCalled();
+    expect(mockAnimalsStore.update).not.toHaveBeenCalled();
   });
 
   it("should update animal", () => {
@@ -95,7 +102,7 @@ describe("useAnimals", () => {
       createdAt: new Date(),
       lastUpdated: new Date(),
     };
-    mockLoadAnimalsFromStorage.mockReturnValue([mockAnimal]);
+    mockAnimalsStore.getSnapshot.mockReturnValue([mockAnimal]);
 
     const { result } = renderHook(() => useAnimals());
 
@@ -103,7 +110,9 @@ describe("useAnimals", () => {
       result.current.updateAnimal("1", { happiness: 75 });
     });
 
-    expect(result.current.animals[0].happiness).toBe(75);
+    expect(mockAnimalsStore.update).toHaveBeenCalledWith([
+      { ...mockAnimal, happiness: 75 },
+    ]);
   });
 
   it("should remove animal", () => {
@@ -129,7 +138,7 @@ describe("useAnimals", () => {
         lastUpdated: new Date(),
       },
     ];
-    mockLoadAnimalsFromStorage.mockReturnValue(mockAnimals);
+    mockAnimalsStore.getSnapshot.mockReturnValue(mockAnimals);
 
     const { result } = renderHook(() => useAnimals());
 
@@ -137,8 +146,7 @@ describe("useAnimals", () => {
       result.current.removeAnimal("1");
     });
 
-    expect(result.current.animals).toHaveLength(1);
-    expect(result.current.animals[0].id).toBe("2");
+    expect(mockAnimalsStore.update).toHaveBeenCalledWith([mockAnimals[1]]);
   });
 
   it("should get animal by id", () => {
@@ -154,7 +162,7 @@ describe("useAnimals", () => {
         lastUpdated: new Date(),
       },
     ];
-    mockLoadAnimalsFromStorage.mockReturnValue(mockAnimals);
+    mockAnimalsStore.getSnapshot.mockReturnValue(mockAnimals);
 
     const { result } = renderHook(() => useAnimals());
 
@@ -169,20 +177,14 @@ describe("useAnimals", () => {
     expect(animal).toBeUndefined();
   });
 
-  it("should save animals to storage when they change", () => {
+  it("should update store when adding animals", () => {
     const { result } = renderHook(() => useAnimals());
 
     act(() => {
       result.current.addAnimal("Buddy", AnimalType.DOG);
     });
 
-    expect(mockSaveAnimalsToStorage).toHaveBeenCalled();
-  });
-
-  it("should not save to storage during initial load", () => {
-    renderHook(() => useAnimals());
-
-    expect(mockSaveAnimalsToStorage).not.toHaveBeenCalled();
+    expect(mockAnimalsStore.update).toHaveBeenCalled();
   });
 
   it("should handle multiple animals", () => {
@@ -194,12 +196,7 @@ describe("useAnimals", () => {
       result.current.addAnimal("Bambi", AnimalType.DEER);
     });
 
-    expect(result.current.animals).toHaveLength(3);
-    expect(result.current.animals.map((a) => a.name)).toEqual([
-      "Buddy",
-      "Rusty",
-      "Bambi",
-    ]);
+    expect(mockAnimalsStore.update).toHaveBeenCalledTimes(3);
   });
 
   it("should maintain animal order after updates", () => {
@@ -225,7 +222,7 @@ describe("useAnimals", () => {
         lastUpdated: new Date(),
       },
     ];
-    mockLoadAnimalsFromStorage.mockReturnValue(mockAnimals);
+    mockAnimalsStore.getSnapshot.mockReturnValue(mockAnimals);
 
     const { result } = renderHook(() => useAnimals());
 
@@ -233,8 +230,9 @@ describe("useAnimals", () => {
       result.current.updateAnimal("1", { happiness: 75 });
     });
 
-    expect(result.current.animals[0].id).toBe("1");
-    expect(result.current.animals[1].id).toBe("2");
-    expect(result.current.animals[0].happiness).toBe(75);
+    expect(mockAnimalsStore.update).toHaveBeenCalledWith([
+      { ...mockAnimals[0], happiness: 75 },
+      mockAnimals[1],
+    ]);
   });
 });

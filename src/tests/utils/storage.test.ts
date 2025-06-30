@@ -384,6 +384,8 @@ describe("animalsStore with useSyncExternalStore", () => {
       throw new Error("Storage error");
     });
 
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
     const animals = [
       {
         id: "1",
@@ -402,12 +404,17 @@ describe("animalsStore with useSyncExternalStore", () => {
 
     // Restore original function
     localStorage.setItem = originalSetItem;
+    consoleSpy.mockRestore();
   });
 
   it("should handle JSON parsing errors", () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
     localStorage.setItem("animal-manager-data", "invalid json");
 
     const snapshot = animalsStore.getSnapshot();
     expect(snapshot).toEqual([]);
+
+    consoleSpy.mockRestore();
   });
 });
