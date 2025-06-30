@@ -10,9 +10,34 @@
     gap: 20px;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid var(--border-color);
 
     @media (max-width: 768px) {
       padding: 20px;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .app-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .urgent-indicator {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: var(--text-size-small);
+        animation: urgentPulse 1.5s infinite;
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+      }
     }
 
     .add-animal-button {
@@ -22,5 +47,78 @@
 
   .app-title {
     font-size: var(--text-size-heading);
+  }
+
+  // Hunger summary styles
+  .hunger-summary {
+    background: var(--card-background);
+    margin: 20px auto;
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    max-width: 600px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 10px;
+      margin: 15px;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+
+      .summary-label {
+        font-size: var(--text-size-small);
+        color: var(--text-color);
+        opacity: 0.8;
+        font-weight: 500;
+      }
+
+      .summary-value {
+        font-size: var(--text-size-medium);
+        font-weight: bold;
+        color: var(--primary-color);
+
+        &.hungry {
+          color: #f39c12;
+        }
+
+        &.urgent {
+          color: #e74c3c;
+          animation: urgentPulse 1.5s infinite;
+        }
+      }
+
+      &.urgent {
+        .summary-label {
+          color: #e74c3c;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// Animation for urgent indicators
+@keyframes urgentPulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
